@@ -186,7 +186,30 @@ function runOCR(imageDataUrl) {
 // ====== DeepSeek API Call ======
 var DEEPSEEK_URL = 'https://api.deepseek.com/chat/completions';
 
-var AI_SYSTEM_PROMPT = '你是一位资深上海高中教师，精通上海等级考命题。你的任务是将外地题目改编为上海等级考格式的大题（含情景引入+10道递进小题）。\n\n## 核心原则\n- 保持原题知识点和核心考点不变\n- 上海等级考最大特色：每个大题必须有真实情景引入，后续小题需能从情景中找到线索\n- 减少纯计算量，增加"说明理由""简述原因""评价方案"等开放性设问\n- 避免"小明在实验室……"等低幼化表述\n\n## 情景引入规范\n- 1-2段文字，写在开头，用"情景："标注\n- 必须是真实、科学的情境，自然衔接到题目\n- 化学常见情景：侯氏制碱法、接触法制硫酸、氯碱工业、含铬废水处理、烟气脱硫脱硝、碳捕集(CCS)、锂电池/钠离子电池、燃料电池、TiO₂光催化、阿司匹林合成、食品添加剂检测、水质分析\n- 物理常见情景：磁悬浮列车原理、卫星变轨、火箭超重失重、电动汽车能量回收、高速公路弯道设计、蹦极/蹦床能量转换、5G电磁波、手机无线充电、CT/MRI原理、光伏发电、风力发电\n\n## 题型与认知层级（10道小题）\n按递进顺序排列：知道→理解→运用→综合\n\n| 题号 | 层级 | 题型 | 说明 |\n|------|------|------|------|\n| 1-2 | 知道 | 单选 | 基础概念识别，4选项(A/B/C/D)，每题1个正确选项 |\n| 3-4 | 理解 | 单选/填空 | 结合情景理解概念，填空可考查化学式、物理量计算等 |\n| 5-6 | 理解 | 不定项/填空 | 不定项需在题干标注"（不定项）"，4选项1~2个正确 |\n| 7-8 | 运用 | 简答/填空 | 分析推理，简答需写"说明理由""简述原因" |\n| 9-10 | 综合 | 计算/论述 | 综合多知识点，计算题保留关键数据，适当减少计算量 |\n\n## 选择题规则\n- 单选：4个选项，不特别标注\n- 不定项：4个选项，题干中标注"（不定项）"，1~2个正确选项\n- 选项格式：A. xxx  B. xxx  C. xxx  D. xxx（两个空格分隔）\n\n## 编号格式\n- 大标题：一、[标题]（黑体14pt居中）\n- 情景：情景：xxx（楷体10.5pt）\n- 小题：1. 2. 3. ...（阿拉伯数字+全角点）\n- 填空：用__________表示空位\n\n## 化学科目特殊要求\n- 情景后加一行：相对原子质量：X-1  Y-2 ...（必须根据题目实际涉及的元素动态列出，不涉及的不要列，不需要的不要多写，只列出题目中真正用到的元素及其原子量，没有涉及的元素一个都不要列）\n- 化学式注意上下标：H₂O写作H2O(下标)，SO₄²⁻写作SO4(下标)2-(上标)\n- 化学方程式使用→或⇌，状态符号用(s)(l)(g)(aq)\n- 有效数字：摩尔质量保留1位小数，pH保留2位小数，平衡常数保留2-3位\n\n## 物理科目特殊要求\n- 不需要相对原子质量行\n- 物理量用常见字母：F(力) m(质量) a(加速度) v(速度) E(能量) B(磁感应强度)\n- 单位用国际单位制：N kg m s Pa J W V A Ω T\n- 数值保留2-3位有效数字，科学记数法用×10ⁿ格式\n- 增加推理过程和实验思想类设问\n\n## 输出要求\n- 输出纯文字，不要markdown代码块，不要用**加粗**或#标题\n- 直接输出完整题目，从"一、"开始\n- 不要写"答案"或"解析"，只输出题目\n\n## 输出格式\n一、[情景标题]\n情景：[1-2段真实情景引入文字]\n相对原子质量：H-1  O-16  Na-23  S-32（仅示例，根据题目实际涉及元素列出，不涉及的不列）\n1. [题干]\nA. [选项]  B. [选项]  C. [选项]  D. [选项]\n2. [题干]\n__________\n3. （不定项）[题干]\nA. [选项]  B. [选项]  C. [选项]  D. [选项]\n...（共10题）';
+var AI_SYSTEM_PROMPT = `你是一位资深上海高中教师，精通上海等级考命题。你的任务是将外地题目改编为上海等级考格式的大题（含情景引入+10道递进小题）。\n\n## 核心原则\n- 保持原题知识点和核心考点不变\n- 上海等级考最大特色：每个大题必须有真实情景引入，后续小题需能从情景中找到线索\n- 减少纯计算量，增加"说明理由""简述原因""评价方案"等开放性设问\n- 避免"小明在实验室……"等低幼化表述\n\n## 情景引入规范\n- 1-2段文字，写在开头，用"情景："标注\n- 必须是真实、科学的情境，自然衔接到题目\n- 化学常见情景：侯氏制碱法、接触法制硫酸、氯碱工业、含铬废水处理、烟气脱硫脱硝、碳捕集(CCS)、锂电池/钠离子电池、燃料电池、TiO₂光催化、阿司匹林合成、食品添加剂检测、水质分析\n- 物理常见情景：磁悬浮列车原理、卫星变轨、火箭超重失重、电动汽车能量回收、高速公路弯道设计、蹦极/蹦床能量转换、5G电磁波、手机无线充电、CT/MRI原理、光伏发电、风力发电\n\n## 题型与认知层级（10道小题）\n按递进顺序排列：知道→理解→运用→综合\n\n| 题号 | 层级 | 题型 | 说明 |\n|------|------|------|------|\n| 1-2 | 知道 | 单选 | 基础概念识别，4选项(A/B/C/D)，每题1个正确选项 |\n| 3-4 | 理解 | 单选/填空 | 结合情景理解概念，填空可考查化学式、物理量计算等 |\n| 5-6 | 理解 | 不定项/填空 | 不定项需在题干标注"（不定项）"，4选项1~2个正确 |\n| 7-8 | 运用 | 简答/填空 | 分析推理，简答需写"说明理由""简述原因" |\n| 9-10 | 综合 | 计算/论述 | 综合多知识点，计算题保留关键数据，适当减少计算量 |\n\n## 选择题规则\n- 单选：4个选项，不特别标注\n- 不定项：4个选项，题干中标注"（不定项）"，1~2个正确选项\n- 选项格式：A. xxx  B. xxx  C. xxx  D. xxx（两个空格分隔）\n\n## 编号格式\n- 大标题：一、[标题]（黑体14pt居中）\n- 情景：情景：xxx（楷体10.5pt）\n- 小题：1. 2. 3. ...（阿拉伯数字+全角点）\n- 填空：用__________表示空位\n\n## 化学科目特殊要求\n- 情景后加一行：相对原子质量：X-1  Y-2 ...（必须根据题目实际涉及的元素动态列出，不涉及的不要列，不需要的不要多写，只列出题目中真正用到的元素及其原子量，没有涉及的元素一个都不要列）\n- 化学式注意上下标：H₂O写作H2O(下标)，SO₄²⁻写作SO4(下标)2-(上标)\n- 化学方程式使用→或⇌，状态符号用(s)(l)(g)(aq)\n- 有效数字：摩尔质量保留1位小数，pH保留2位小数，平衡常数保留2-3位\n\n## 物理科目特殊要求\n- 不需要相对原子质量行\n- 物理量用常见字母：F(力) m(质量) a(加速度) v(速度) E(能量) B(磁感应强度)\n- 单位用国际单位制：N kg m s Pa J W V A Ω T\n- 数值保留2-3位有效数字，科学记数法用×10ⁿ格式\n- 增加推理过程和实验思想类设问\n\n## 输出要求\n- 输出纯文字，不要markdown代码块，不要用**加粗**或#标题\n- 直接输出完整题目，从"一、"开始\n- 题目输出完毕后，用一行"=====答案与解析====="作为分隔，然后输出所有题目的答案和详细解析\n\n## 答案与解析格式（分隔线之后）
+- 每个小题单独一段，格式为"1. [答案]"
+- 答案后另起一段"解析：[详细解析]"（物理：推理解题过程、公式推导；化学：反应原理、计算过程）
+- 选择题：给出正确选项，每个错误选项一句话说明为什么不选
+- 计算题：完整计算步骤；简答题：完整得分点
+
+## 输出格式
+一、[情景标题]
+情景：[1-2段真实情景引入文字]
+相对原子质量：H-1  O-16  Na-23  S-32（仅示例，根据题目实际涉及元素列出，不涉及的不列）
+1. [题干]
+A. [选项]  B. [选项]  C. [选项]  D. [选项]
+2. [题干]
+__________
+...（共10题）
+
+=====答案与解析=====
+1. [答案]
+解析：[详细解析过程]
+
+2. [答案]
+解析：[详细解析过程]
+
+...（共10题解析）`;
 
 function callDeepSeek(userText, subject) {
   var systemPrompt = AI_SYSTEM_PROMPT;
@@ -263,10 +286,36 @@ function startAI(text) {
 
   callDeepSeek(text, state.subject)
     .then(function(adaptedText) {
-      loadingText.textContent = '改编完成，正在生成 .docx 文件...';
-      return buildDocx(adaptedText, state.subject).then(function(blob) {
-        downloadBlob(blob);
-        showDone();
+      loadingText.textContent = '改编完成，正在生成题目文档和解析文档...';
+
+      // Split at separator
+      var sepIdx = adaptedText.indexOf('=====答案与解析=====');
+      var questionTextPart = adaptedText;
+      var answerTextPart = '';
+
+      if (sepIdx !== -1) {
+        questionTextPart = adaptedText.substring(0, sepIdx).trim();
+        answerTextPart = adaptedText.substring(sepIdx + '=====答案与解析====='.length).trim();
+        // Strip leading/trailing newlines from separator
+        answerTextPart = answerTextPart.replace(/^[\r\n]+/, '').replace(/[\r\n]+$/, '');
+      }
+
+      // Generate question docx
+      return buildDocx(questionTextPart, state.subject).then(function(qBlob) {
+        var dateStr = new Date().toISOString().slice(0, 10);
+        downloadBlob(qBlob, '上海等级考_' + state.subject + '_' + dateStr);
+        showToast('题目文档已下载');
+
+        // Generate answer docx if we have answers
+        if (answerTextPart) {
+          return buildAnswerDocx(answerTextPart, state.subject).then(function(aBlob) {
+            downloadBlob(aBlob, '上海等级考_' + state.subject + '_解析_' + dateStr);
+            showToast('解析文档已下载');
+            showDone();
+          });
+        } else {
+          showDone();
+        }
       });
     })
     .catch(function(e) {
@@ -310,10 +359,10 @@ document.getElementById('directDownloadBtn').addEventListener('click', function(
 });
 
 // ====== Shared ======
-function downloadBlob(blob) {
+function downloadBlob(blob, filename) {
   var a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = '上海等级考_' + state.subject + '_' + new Date().toISOString().slice(0, 10) + '.docx';
+  a.download = (filename || '上海等级考_' + state.subject + '_' + new Date().toISOString().slice(0, 10)) + '.docx';
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
@@ -484,6 +533,113 @@ function buildDocx(text, subject) {
     children.push(new Paragraph({
       alignment: AlignmentType.LEFT,
       spacing: { after: 180, line: 293 },
+      indent: { firstLine: 420 },
+      children: [new TextRun({
+        text: line,
+        font: { eastAsia: '宋体', ascii: 'Times New Roman', hAnsi: 'Times New Roman', cs: 'Times New Roman' },
+        size: 21
+      })]
+    }));
+  }
+
+  var doc = new Document({
+    sections: [{
+      properties: {
+        page: {
+          size: { width: 11906, height: 16838 },
+          margin: { top: 1440, bottom: 1440, left: 1800, right: 1800 }
+        }
+      },
+      children: children
+    }]
+  });
+
+  return Packer.toBlob(doc);
+}
+
+// ====== Answer Docx Builder ======
+function buildAnswerDocx(text, subject) {
+  var D = window.docx;
+  if (!D) throw new Error('docx 库加载失败，请检查网络连接');
+
+  var Document = D.Document;
+  var Packer = D.Packer;
+  var Paragraph = D.Paragraph;
+  var TextRun = D.TextRun;
+  var AlignmentType = D.AlignmentType;
+
+  var lines = text.split('\n');
+  var children = [];
+
+  // Title
+  children.push(new Paragraph({
+    alignment: AlignmentType.CENTER,
+    spacing: { after: 400 },
+    children: [new TextRun({
+      text: '上海' + subject + '等级考模拟题  参考答案与解析',
+      font: { eastAsia: '黑体', ascii: 'Times New Roman', hAnsi: 'Times New Roman', cs: 'Times New Roman' },
+      size: 32,
+      bold: true
+    })]
+  }));
+
+  for (var i = 0; i < lines.length; i++) {
+    var raw = lines[i];
+    var line = raw.trim();
+
+    if (!line) {
+      children.push(new Paragraph({
+        spacing: { after: 80 },
+        children: [new TextRun({ text: '', size: 21 })]
+      }));
+      continue;
+    }
+
+    // Skip the separator line
+    if (line.indexOf('=====') === 0) continue;
+    if (line === '```' || line === '```text' || line === '```markdown') continue;
+
+    // Question number: "1. A" or "1. 3.2m/s²"
+    var numMatch = line.match(/^[（(]?(\d+)[)）.．、\s]+(.*)/);
+    if (numMatch) {
+      var qNum = numMatch[1];
+      var answer = numMatch[2].trim();
+      children.push(new Paragraph({
+        alignment: AlignmentType.LEFT,
+        spacing: { before: 200, after: 80, line: 360 },
+        children: [
+          new TextRun({
+            text: qNum + '. ' + (answer || ''),
+            font: { eastAsia: '宋体', ascii: 'Times New Roman', hAnsi: 'Times New Roman', cs: 'Times New Roman' },
+            size: 21,
+            bold: true
+          })
+        ]
+      }));
+      continue;
+    }
+
+    // Analysis line: "解析：xxx"
+    var analMatch = line.match(/^(解析|【解析】)[：:]\s*/);
+    if (analMatch) {
+      var analText = line.replace(/^(解析|【解析】)[：:]\s*/, '');
+      children.push(new Paragraph({
+        alignment: AlignmentType.LEFT,
+        spacing: { after: 150, line: 293 },
+        indent: { firstLine: 420 },
+        children: [new TextRun({
+          text: '解析：' + analText,
+          font: { eastAsia: '楷体', ascii: 'Times New Roman', hAnsi: 'Times New Roman', cs: 'Times New Roman' },
+          size: 21
+        })]
+      }));
+      continue;
+    }
+
+    // Any other line: treat as continuation of answer or analysis
+    children.push(new Paragraph({
+      alignment: AlignmentType.LEFT,
+      spacing: { after: 100, line: 293 },
       indent: { firstLine: 420 },
       children: [new TextRun({
         text: line,
