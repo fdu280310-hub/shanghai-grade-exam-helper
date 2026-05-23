@@ -2,6 +2,7 @@
 var state = {
   subject: '化学',
   questionImage: null,
+  questionImageData: null,
   questionText: '',
   apiKey: ''
 };
@@ -122,11 +123,12 @@ function handleImage(file) {
   state.questionImage = file;
   var reader = new FileReader();
   reader.onload = function(e) {
+    state.questionImageData = e.target.result;
     previewImg.src = e.target.result;
     previewImg.style.display = 'block';
     textCard.style.display = 'block';
     uploadIcon.textContent = 'OK';
-    uploadHint.innerHTML = '图片已上传，点击<b>重新选择</b>';
+    uploadHint.innerHTML = '图片已上传，AI 将直接读取图片内容。点击<b>重新选择</b>';
     updateSteps(2);
     textCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
   };
@@ -144,6 +146,17 @@ function callDeepSeek(userText, subject) {
     systemPrompt = systemPrompt.replace('化学题需在情景后加"相对原子质量："行', '物理题不需要相对原子质量');
   }
 
+  // Build user message: include image if available (DeepSeek Vision)
+  var userContent;
+  if (state.questionImageData) {
+    userContent = [
+      { type: 'image_url', image_url: { url: state.questionImageData } },
+      { type: 'text', text: '请将以上图片中的外地' + subject + '题目改编为上海等级考格式。' + (userText ? '\n\n以下是我手动输入的文字供参考：\n' + userText : '') }
+    ];
+  } else {
+    userContent = '请将以下外地' + subject + '题目改编为上海等级考格式：\n\n' + userText;
+  }
+
   return fetch(DEEPSEEK_URL, {
     method: 'POST',
     headers: {
@@ -154,7 +167,7 @@ function callDeepSeek(userText, subject) {
       model: 'deepseek-chat',
       messages: [
         { role: 'system', content: systemPrompt },
-        { role: 'user', content: '请将以下外地' + subject + '题目改编为上海等级考格式：\n\n' + userText }
+        { role: 'user', content: userContent }
       ],
       temperature: 0.7,
       max_tokens: 4096
@@ -180,8 +193,8 @@ var loadingText = document.getElementById('loadingText');
 
 document.getElementById('aiDownloadBtn').addEventListener('click', function() {
   var text = questionText.value.trim();
-  if (!text) {
-    showToast('请先输入题目内容');
+  if (!text && !state.questionImageData) {
+    showToast('请先上传题目图片或输入文字内容');
     return;
   }
 
@@ -446,6 +459,7 @@ function buildDocx(text, subject) {
 // ====== New Question ======
 document.getElementById('newQuestionBtn').addEventListener('click', function() {
   state.questionImage = null;
+  state.questionImageData = null;
   state.questionText = '';
   previewImg.style.display = 'none';
   previewImg.src = '';
@@ -455,7 +469,7 @@ document.getElementById('newQuestionBtn').addEventListener('click', function() {
   questionText.value = '';
   fileInput.value = '';
   uploadIcon.textContent = '';
-  uploadHint.innerHTML = '点击<b>拍照</b>或<b>选择图片</b>（图片仅供自己参考）<br><span style="font-size:12px;color:#94a3b8">也可跳过，直接在下方文本框粘贴题目文字</span>';
+  uploadHint.innerHTML = '点击<b>拍照</b>或<b>选择图片</b>（AI 将直接读取图片内容）<br><span style="font-size:12px;color:#94a3b8">也可跳过，直接在下方文本框粘贴题目文字</span>';
   updateSteps(2);
   window.scrollTo({ top: 0, behavior: 'smooth' });
 });

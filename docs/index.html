@@ -332,7 +332,7 @@ footer a { color: var(--primary); text-decoration: none; font-weight: 500; }
     <div class="upload-area" id="uploadArea">
       <span class="upload-icon" id="uploadIcon">&#x1F4F7;</span>
       <div class="hint" id="uploadHint">
-        点击<b>拍照</b>或<b>选择图片</b>（图片仅供自己参考）
+        点击<b>拍照</b>或<b>选择图片</b>（AI 将直接读取图片内容）
         <br><span style="font-size:12px;color:#94a3b8">也可跳过，直接在下方文本框粘贴题目文字</span>
       </div>
     </div>
@@ -347,13 +347,16 @@ footer a { color: var(--primary); text-decoration: none; font-weight: 500; }
       <h2>编辑题目并生成</h2>
       <span style="font-size:11px;color:#94a3b8;margin-left:auto">修改确认后下载</span>
     </div>
-    <textarea id="questionText" placeholder="在此输入或粘贴外地题目文字...
+    <textarea id="questionText" placeholder="如果已上传图片，AI 会自动读取图片内容，无需手动输入。
 
-AI 会自动：
-- 分析题目，提取关键知识点
-- 添加上海特色情景引入（楷体显示）
-- 按递进认知层级（知道→理解→运用→综合）出 10 题
-- 调整题型编号为等级考格式"></textarea>
+也可在此手动输入或粘贴题目文字：
+（手动输入的内容会一并发送给 AI 作为参考）
+
+格式提示：
+一、大题标题
+情景：情景引入文字
+1. 小题题干
+A. 选项A    B. 选项B    C. 选项C    D. 选项D"></textarea>
 
     <!-- Loading -->
     <div class="loading-box" id="loadingBox">
