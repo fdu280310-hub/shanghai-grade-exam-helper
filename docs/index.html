@@ -97,6 +97,7 @@ main { padding: 8px 16px 24px; position: relative; z-index: 1; }
 .card:nth-child(2) { animation-delay: .1s; }
 .card:nth-child(3) { animation-delay: .15s; }
 .card:nth-child(4) { animation-delay: .2s; }
+.card:nth-child(5) { animation-delay: .25s; }
 
 .card-head {
   display: flex; align-items: center; gap: 10px; margin-bottom: 14px;
@@ -127,6 +128,38 @@ main { padding: 8px 16px 24px; position: relative; z-index: 1; }
   border-color: var(--phys); background: var(--phys-light); color: #6d28d9;
   box-shadow: 0 0 0 3px rgba(139,92,246,.15);
 }
+
+/* ====== API Settings ====== */
+.api-toggle {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 12px; color: var(--text-secondary); cursor: pointer;
+  padding: 6px 0;
+}
+.api-toggle:hover { color: var(--primary); }
+.api-settings {
+  display: none; margin-top: 10px;
+}
+.api-settings.show { display: block; }
+.api-settings input {
+  width: 100%; padding: 10px 12px; border: 2px solid var(--border);
+  border-radius: 8px; font-size: 13px; font-family: "SF Mono", "Consolas", monospace;
+  color: var(--text); background: #fafbfc;
+}
+.api-settings input:focus { outline: none; border-color: var(--primary); }
+.api-row {
+  display: flex; gap: 8px; margin-top: 8px;
+}
+.api-row .btn-sm {
+  padding: 8px 16px; border: none; border-radius: 8px;
+  font-size: 13px; font-weight: 600; cursor: pointer;
+}
+.btn-sm-save { background: var(--primary); color: #fff; }
+.btn-sm-clear { background: #f1f5f9; color: var(--text-secondary); }
+.api-status {
+  font-size: 11px; margin-top: 4px;
+}
+.api-status.ok { color: var(--success); }
+.api-status.none { color: #94a3b8; }
 
 .upload-area {
   border: 2.5px dashed #cbd5e1; border-radius: var(--radius);
@@ -165,16 +198,51 @@ textarea:focus { outline: none; border-color: var(--primary); background: #fff; 
   -webkit-tap-highlight-color: transparent;
 }
 .btn:active { transform: scale(.97); }
+.btn:disabled { opacity: .6; pointer-events: none; }
 .btn-primary {
   background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
   color: #fff; box-shadow: 0 4px 12px rgba(79,70,229,.3);
   margin-top: 12px;
 }
 .btn-primary:active { box-shadow: 0 2px 6px rgba(79,70,229,.2); }
+.btn-ai {
+  background: linear-gradient(135deg, #f59e0b 0%, #ef4444 50%, #8b5cf6 100%);
+  color: #fff; box-shadow: 0 4px 12px rgba(245,158,11,.3);
+  margin-top: 12px; animation: shimmer 3s ease-in-out infinite;
+  background-size: 200% 200%;
+}
+@keyframes shimmer {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+.btn-secondary {
+  background: #f1f5f9; color: var(--text-secondary); margin-top: 10px;
+  border: 1.5px solid var(--border);
+}
 .btn-reset {
   background: #fff; color: var(--text-secondary); margin-top: 8px;
   border: 1.5px solid var(--border);
 }
+
+/* ====== Loading ====== */
+.loading-box {
+  display: none; text-align: center; padding: 20px;
+}
+.loading-box.show { display: block; }
+.loading-dots {
+  display: flex; justify-content: center; gap: 6px; margin-bottom: 10px;
+}
+.loading-dots span {
+  width: 10px; height: 10px; border-radius: 50%; background: var(--primary);
+  animation: bounce 1.4s ease-in-out infinite both;
+}
+.loading-dots span:nth-child(1) { animation-delay: -.32s; }
+.loading-dots span:nth-child(2) { animation-delay: -.16s; }
+@keyframes bounce {
+  0%, 80%, 100% { transform: scale(0); }
+  40% { transform: scale(1); }
+}
+.loading-text { font-size: 13px; color: var(--text-secondary); }
 
 .help-steps { counter-reset: step; list-style: none; }
 .help-steps li {
@@ -216,7 +284,7 @@ footer a { color: var(--primary); text-decoration: none; font-weight: 500; }
 <div class="app-bar">
   <span class="logo">&#x1F4DD;</span>
   <h1>上海等级考出题助手</h1>
-  <p class="tagline">输入题目文字，一键下载等级考格式 Word 文档</p>
+  <p class="tagline">输入外地题目，AI 改编 + 一键生成等级考格式 Word</p>
 </div>
 
 <div class="steps-bar" id="stepsBar">
@@ -228,7 +296,7 @@ footer a { color: var(--primary); text-decoration: none; font-weight: 500; }
 </div>
 
 <main>
-  <!-- Step 1: Subject -->
+  <!-- Step 1: Subject + API Key -->
   <div class="card">
     <div class="card-head">
       <div class="num">1</div>
@@ -242,6 +310,17 @@ footer a { color: var(--primary); text-decoration: none; font-weight: 500; }
         <span class="emoji">&#x26A1;</span>物理
       </button>
     </div>
+    <div class="api-toggle" id="apiToggle">
+      &#x2699; DeepSeek API 设置 <span id="apiBadge" style="font-size:10px;color:#94a3b8"></span>
+    </div>
+    <div class="api-settings" id="apiSettings">
+      <input type="password" id="apiKeyInput" placeholder="输入 DeepSeek API Key（sk-...）" autocomplete="off">
+      <div class="api-row">
+        <button class="btn-sm btn-sm-save" id="saveApiKeyBtn">保存</button>
+        <button class="btn-sm btn-sm-clear" id="clearApiKeyBtn">清除</button>
+      </div>
+      <div class="api-status none" id="apiStatus">未设置 Key，将仅做排版不做 AI 改编</div>
+    </div>
   </div>
 
   <!-- Step 2: Input -->
@@ -254,32 +333,39 @@ footer a { color: var(--primary); text-decoration: none; font-weight: 500; }
       <span class="upload-icon" id="uploadIcon">&#x1F4F7;</span>
       <div class="hint" id="uploadHint">
         点击<b>拍照</b>或<b>选择图片</b>（图片仅供自己参考）
-        <br><span style="font-size:12px;color:#94a3b8">也可跳过此步，直接在下方文本框粘贴题目文字</span>
+        <br><span style="font-size:12px;color:#94a3b8">也可跳过，直接在下方文本框粘贴题目文字</span>
       </div>
     </div>
     <input type="file" id="fileInput" accept="image/*" style="display:none">
     <img class="preview-img" id="previewImg" alt="题目预览">
   </div>
 
-  <!-- Step 3: Edit & Download -->
+  <!-- Step 3: Edit & Generate -->
   <div class="card" id="textCard" style="display:none">
     <div class="card-head">
       <div class="num">3</div>
       <h2>编辑题目并生成</h2>
       <span style="font-size:11px;color:#94a3b8;margin-left:auto">修改确认后下载</span>
     </div>
-    <textarea id="questionText" placeholder="在此输入或粘贴题目文字内容...
+    <textarea id="questionText" placeholder="在此输入或粘贴外地题目文字...
 
-格式提示（按回车换行）：
-一、大题标题
-情景：这里写情景引入文字
-1. 小题题干
-A. 选项A    B. 选项B    C. 选项C    D. 选项D
-2. 另一小题...
+AI 会自动：
+- 分析题目，提取关键知识点
+- 添加上海特色情景引入（楷体显示）
+- 按递进认知层级（知道→理解→运用→综合）出 10 题
+- 调整题型编号为等级考格式"></textarea>
 
-化学科目会自动添加相对原子质量行"></textarea>
-    <button class="btn btn-primary" id="downloadBtn">
-      下载 .docx 文件
+    <!-- Loading -->
+    <div class="loading-box" id="loadingBox">
+      <div class="loading-dots"><span></span><span></span><span></span></div>
+      <div class="loading-text" id="loadingText">AI 正在分析并改编题目...</div>
+    </div>
+
+    <button class="btn btn-ai" id="aiDownloadBtn">
+      AI 智能改编并下载 .docx
+    </button>
+    <button class="btn btn-secondary" id="directDownloadBtn">
+      直接下载（不改编，仅排版）
     </button>
   </div>
 
@@ -302,13 +388,13 @@ A. 选项A    B. 选项B    C. 选项C    D. 选项D
       <h2>使用说明</h2>
     </div>
     <ol class="help-steps">
-      <li>选择科目（物理 / 化学）</li>
-      <li>拍照供参考，在文本框粘贴或输入题目文字</li>
-      <li>编辑确认后点「下载 .docx」</li>
-      <li>得到规范排版的等级考格式 Word 文件</li>
+      <li>选择科目，填入 DeepSeek API Key（可选）</li>
+      <li>输入或粘贴外地题目文字</li>
+      <li>点「AI 智能改编并下载」— DeepSeek 自动改编 + 生成 Word</li>
+      <li>或不填 Key，点「直接下载」仅做排版</li>
     </ol>
     <div class="help-note">
-      纯浏览器生成，无需安装任何 App 或插件，完全免费
+      DeepSeek API Key 在 <a href="https://platform.deepseek.com/api_keys" target="_blank">platform.deepseek.com</a> 获取，新用户有免费额度
     </div>
   </div>
 </main>
