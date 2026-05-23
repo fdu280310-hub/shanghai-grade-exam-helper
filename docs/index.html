@@ -358,6 +358,15 @@ footer a { color: var(--primary); text-decoration: none; font-weight: 500; }
 1. 小题题干
 A. 选项A    B. 选项B    C. 选项C    D. 选项D"></textarea>
 
+    <!-- OCR Progress -->
+    <div class="loading-box" id="ocrLoading" style="display:none">
+      <div class="loading-dots"><span></span><span></span><span></span></div>
+      <div class="loading-text" id="ocrLoadingText">正在识别图片文字...</div>
+      <div style="width:100%;height:4px;background:#e2e8f0;border-radius:2px;margin-top:8px;overflow:hidden">
+        <div id="ocrProgressBar" style="height:100%;width:0%;background:linear-gradient(90deg,#4f46e5,#7c3aed);border-radius:2px;transition:width .3s"></div>
+      </div>
+    </div>
+
     <!-- Loading -->
     <div class="loading-box" id="loadingBox">
       <div class="loading-dots"><span></span><span></span><span></span></div>
@@ -409,6 +418,7 @@ A. 选项A    B. 选项B    C. 选项C    D. 选项D"></textarea>
   <a href="https://github.com/fdu280310-hub/shanghai-grade-exam-helper" target="_blank">GitHub</a>
 </footer>
 
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.umd.min.js"></script>
 <script src="app.js"></script>
 </body>

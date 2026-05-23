@@ -128,11 +128,59 @@ function handleImage(file) {
     previewImg.style.display = 'block';
     textCard.style.display = 'block';
     uploadIcon.textContent = 'OK';
-    uploadHint.innerHTML = '图片已上传，AI 将直接读取图片内容。点击<b>重新选择</b>';
+    uploadHint.innerHTML = '图片已上传，正在识别文字... 点击<b>重新选择</b>';
     updateSteps(2);
     textCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    // Run OCR automatically
+    runOCR(e.target.result);
   };
   reader.readAsDataURL(file);
+}
+
+// ====== Tesseract.js OCR ======
+function runOCR(imageDataUrl) {
+  var ocrBox = document.getElementById('ocrLoading');
+  var ocrText = document.getElementById('ocrLoadingText');
+  var ocrBar = document.getElementById('ocrProgressBar');
+
+  ocrBox.style.display = 'block';
+  ocrBar.style.width = '0%';
+
+  Tesseract.recognize(imageDataUrl, 'chi_sim+eng', {
+    logger: function(m) {
+      if (m.status === 'recognizing text') {
+        ocrText.textContent = '正在识别文字... ' + Math.round(m.progress * 100) + '%';
+        ocrBar.style.width = Math.round(m.progress * 100) + '%';
+      } else if (m.status === 'loading tesseract core' || m.status === 'loading language traineddata') {
+        ocrText.textContent = '加载中文识别包（首次约10MB）...';
+        if (m.progress) {
+          ocrBar.style.width = Math.round(m.progress * 100) + '%';
+        }
+      } else {
+        ocrText.textContent = m.status;
+      }
+    }
+  }).then(function(result) {
+    var text = result.data.text.trim();
+    if (text) {
+      questionText.value = text;
+      ocrText.textContent = '识别完成，请核对并修改后点击下载';
+      ocrBar.style.width = '100%';
+      uploadHint.innerHTML = '文字已自动识别填入下方。点击<b>重新选择</b>';
+      showToast('文字识别完成，请核对修改');
+    } else {
+      ocrText.textContent = '未能识别到文字，请手动输入';
+      uploadHint.innerHTML = '图片已上传，请手动输入题目文字。点击<b>重新选择</b>';
+    }
+  }).catch(function(err) {
+    console.error('OCR error:', err);
+    ocrText.textContent = '识别失败，请手动输入文字';
+    uploadHint.innerHTML = '图片已上传，OCR 失败，请手动输入文字。点击<b>重新选择</b>';
+  }).finally(function() {
+    setTimeout(function() {
+      ocrBox.style.display = 'none';
+    }, 1500);
+  });
 }
 
 // ====== DeepSeek API Call ======
@@ -149,16 +197,8 @@ function callDeepSeek(userText, subject) {
     systemPrompt += '\n\n特别注意：本次是化学科目，必须在情景后添加"相对原子质量"行。';
   }
 
-  // Build user message: include image if available (DeepSeek Vision)
-  var userContent;
-  if (state.questionImageData) {
-    userContent = [
-      { type: 'image_url', image_url: { url: state.questionImageData } },
-      { type: 'text', text: '请将以上图片中的外地' + subject + '题目改编为上海等级考格式。' + (userText ? '\n\n以下是我手动输入的文字供参考：\n' + userText : '') }
-    ];
-  } else {
-    userContent = '请将以下外地' + subject + '题目改编为上海等级考格式：\n\n' + userText;
-  }
+  // Build user message with OCR text (DeepSeek chat doesn't support images)
+  var userContent = '请将以下外地' + subject + '题目改编为上海等级考格式：\n\n' + userText;
 
   return fetch(DEEPSEEK_URL, {
     method: 'POST',
