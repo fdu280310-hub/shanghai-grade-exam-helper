@@ -2,166 +2,360 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="theme-color" content="#1a73e8">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#4f46e5">
 <title>上海等级考出题助手</title>
 <link rel="manifest" href="manifest.json">
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --primary: #4f46e5;
+  --primary-light: #818cf8;
+  --primary-dark: #3730a3;
+  --chem: #0ea5e9;
+  --chem-light: #e0f2fe;
+  --phys: #8b5cf6;
+  --phys-light: #ede9fe;
+  --success: #10b981;
+  --text: #1e293b;
+  --text-secondary: #64748b;
+  --border: #e2e8f0;
+  --bg: #f8fafc;
+  --card: #ffffff;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,.05);
+  --shadow: 0 4px 6px -1px rgba(0,0,0,.07), 0 2px 4px -2px rgba(0,0,0,.05);
+  --shadow-lg: 0 10px 25px -5px rgba(0,0,0,.1), 0 4px 10px -6px rgba(0,0,0,.05);
+  --radius: 16px;
+  --radius-sm: 10px;
+}
+
 body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
-  background: #f5f5f5; color: #333; line-height: 1.6;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "PingFang SC", "Microsoft YaHei", sans-serif;
+  background: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 30%, #f0f5ff 60%, #ede9fe 100%);
+  background-attachment: fixed;
+  color: var(--text); line-height: 1.6;
   max-width: 480px; margin: 0 auto; min-height: 100vh;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-font-smoothing: antialiased;
+  padding-bottom: env(safe-area-inset-bottom, 20px);
 }
-header {
-  background: #1a73e8; color: #fff; padding: 16px 20px;
-  text-align: center; position: sticky; top: 0; z-index: 10;
-}
-header h1 { font-size: 18px; font-weight: 600; }
-header p { font-size: 12px; opacity: 0.85; margin-top: 2px; }
 
-main { padding: 16px; }
+/* ====== App Bar ====== */
+.app-bar {
+  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+  color: #fff; padding: 20px 24px 32px;
+  text-align: center; position: relative; overflow: hidden;
+}
+.app-bar::after {
+  content: ''; position: absolute; bottom: -20px; left: -20%; width: 140%; height: 48px;
+  background: var(--bg); border-radius: 50% 50% 0 0;
+}
+.app-bar .logo {
+  font-size: 42px; margin-bottom: 8px; display: block;
+  animation: float 3s ease-in-out infinite;
+}
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+.app-bar h1 { font-size: 20px; font-weight: 700; letter-spacing: -.3px; }
+.app-bar .tagline { font-size: 13px; opacity: .85; margin-top: 4px; font-weight: 400; }
+
+/* ====== Step Indicator ====== */
+.steps-bar {
+  display: flex; justify-content: center; gap: 8px; align-items: center;
+  padding: 0 24px 20px; position: relative; z-index: 1; margin-top: -12px;
+}
+.step-dot {
+  width: 28px; height: 28px; border-radius: 50%;
+  background: #e2e8f0; color: #94a3b8;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 700; transition: all .3s cubic-bezier(.4,0,.2,1);
+}
+.step-dot.done { background: var(--primary); color: #fff; }
+.step-dot.active { background: var(--primary); color: #fff; box-shadow: 0 0 0 4px rgba(79,70,229,.2); }
+.step-line {
+  width: 32px; height: 2px; background: #e2e8f0; border-radius: 1px;
+  transition: background .3s;
+}
+.step-line.done { background: var(--primary); }
+
+/* ====== Main ====== */
+main { padding: 8px 16px 24px; position: relative; z-index: 1; }
+
 .card {
-  background: #fff; border-radius: 12px; padding: 16px;
-  margin-bottom: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  background: var(--card); border-radius: var(--radius);
+  padding: 20px; margin-bottom: 14px;
+  box-shadow: var(--shadow);
+  border: 1px solid rgba(226,232,240,.6);
+  transition: all .3s cubic-bezier(.4,0,.2,1);
+  animation: cardIn .4s ease forwards;
+  opacity: 0; transform: translateY(12px);
 }
-.card h2 { font-size: 15px; margin-bottom: 12px; color: #1a73e8; }
+@keyframes cardIn { to { opacity: 1; transform: translateY(0); } }
+.card:nth-child(1) { animation-delay: .05s; }
+.card:nth-child(2) { animation-delay: .1s; }
+.card:nth-child(3) { animation-delay: .15s; }
+.card:nth-child(4) { animation-delay: .2s; }
+.card:nth-child(5) { animation-delay: .25s; }
 
-.subject-row { display: flex; gap: 8px; }
+.card-head {
+  display: flex; align-items: center; gap: 10px; margin-bottom: 14px;
+}
+.card-head .num {
+  width: 26px; height: 26px; border-radius: 8px;
+  background: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%);
+  color: var(--primary); font-size: 13px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.card-head h2 { font-size: 15px; font-weight: 600; color: var(--text); }
+
+/* ====== Subject Selector ====== */
+.subject-row { display: flex; gap: 10px; }
 .subject-btn {
-  flex: 1; padding: 10px; border: 2px solid #e0e0e0; border-radius: 8px;
-  background: #fff; font-size: 15px; cursor: pointer; text-align: center;
-  transition: all 0.2s;
+  flex: 1; padding: 14px 12px; border: 2px solid var(--border);
+  border-radius: var(--radius-sm); background: #fff;
+  font-size: 15px; font-weight: 600; cursor: pointer; text-align: center;
+  transition: all .25s cubic-bezier(.4,0,.2,1);
+  position: relative; overflow: hidden;
 }
-.subject-btn.active { border-color: #1a73e8; background: #e8f0fe; color: #1a73e8; font-weight: 600; }
+.subject-btn .emoji { font-size: 24px; display: block; margin-bottom: 4px; }
+.subject-btn.chem.active {
+  border-color: var(--chem); background: var(--chem-light); color: #0369a1;
+  box-shadow: 0 0 0 3px rgba(14,165,233,.15);
+}
+.subject-btn.phys.active {
+  border-color: var(--phys); background: var(--phys-light); color: #6d28d9;
+  box-shadow: 0 0 0 3px rgba(139,92,246,.15);
+}
 
+/* ====== Upload Area ====== */
 .upload-area {
-  border: 2px dashed #ccc; border-radius: 12px; padding: 24px 16px;
-  text-align: center; cursor: pointer; transition: border-color 0.2s;
+  border: 2.5px dashed #cbd5e1; border-radius: var(--radius);
+  padding: 28px 20px; text-align: center; cursor: pointer;
+  transition: all .25s; background: #fafbfc; position: relative;
 }
-.upload-area:hover, .upload-area.drag-over { border-color: #1a73e8; }
-.upload-area .icon { font-size: 36px; margin-bottom: 8px; }
-.upload-area .hint { font-size: 13px; color: #888; }
-.upload-area .hint strong { color: #1a73e8; }
+.upload-area:active, .upload-area.drag-over {
+  border-color: var(--primary); background: #eef2ff;
+  transform: scale(.98);
+}
+.upload-area .upload-icon {
+  font-size: 44px; margin-bottom: 10px; display: block;
+}
+.upload-area .hint {
+  font-size: 14px; color: var(--text-secondary); line-height: 1.5;
+}
+.upload-area .hint b { color: var(--primary); }
 
 .preview-img {
-  width: 100%; max-height: 260px; object-fit: contain;
-  border-radius: 8px; margin-top: 8px; display: none;
+  width: 100%; max-height: 280px; object-fit: contain;
+  border-radius: var(--radius-sm); margin-top: 12px;
+  display: none; box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border);
 }
 
+/* ====== Textarea ====== */
 textarea {
-  width: 100%; min-height: 120px; border: 1px solid #ddd; border-radius: 8px;
-  padding: 12px; font-size: 14px; font-family: inherit; resize: vertical;
-  margin-top: 8px;
+  width: 100%; min-height: 130px; border: 2px solid var(--border);
+  border-radius: var(--radius-sm); padding: 14px;
+  font-size: 14px; font-family: inherit; resize: vertical;
+  color: var(--text); background: #fafbfc;
+  transition: all .2s; line-height: 1.7;
 }
-textarea:focus { outline: none; border-color: #1a73e8; }
+textarea:focus { outline: none; border-color: var(--primary); background: #fff; box-shadow: 0 0 0 3px rgba(79,70,229,.1); }
 
+/* ====== Buttons ====== */
 .btn {
-  display: block; width: 100%; padding: 14px; border: none; border-radius: 10px;
-  font-size: 16px; font-weight: 600; cursor: pointer; text-align: center;
-  transition: all 0.2s;
+  display: block; width: 100%; padding: 15px; border: none; border-radius: var(--radius-sm);
+  font-size: 16px; font-weight: 700; cursor: pointer; text-align: center;
+  transition: all .25s cubic-bezier(.4,0,.2,1);
+  letter-spacing: -.2px;
+  -webkit-tap-highlight-color: transparent;
 }
-.btn-primary { background: #1a73e8; color: #fff; }
-.btn-primary:hover { background: #1557b0; }
-.btn-secondary { background: #e8f0fe; color: #1a73e8; margin-top: 8px; }
-.btn-success { background: #0d904f; color: #fff; margin-top: 8px; }
+.btn:active { transform: scale(.97); }
+.btn-primary {
+  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+  color: #fff; box-shadow: 0 4px 12px rgba(79,70,229,.3);
+  margin-top: 12px;
+}
+.btn-primary:active { box-shadow: 0 2px 6px rgba(79,70,229,.2); }
+.btn-secondary {
+  background: #f1f5f9; color: var(--primary); margin-top: 10px;
+  border: 1.5px solid #e2e8f0;
+}
+.btn-copy {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: #fff; margin-top: 10px;
+  box-shadow: 0 4px 12px rgba(16,185,129,.3);
+}
+.btn-reset {
+  background: #fff; color: var(--text-secondary); margin-top: 8px;
+  border: 1.5px solid var(--border);
+}
 
+/* ====== Prompt Box ====== */
 .prompt-box {
-  background: #f8f9fa; border: 1px solid #e0e0e0; border-radius: 8px;
-  padding: 12px; font-size: 12px; font-family: "SF Mono", "Consolas", monospace;
-  white-space: pre-wrap; word-break: break-all; max-height: 200px;
-  overflow-y: auto; margin-top: 8px; display: none;
+  background: #1e293b; border-radius: var(--radius-sm);
+  padding: 14px; font-size: 12px; color: #e2e8f0;
+  font-family: "SF Mono", "Cascadia Code", "Consolas", monospace;
+  white-space: pre-wrap; word-break: break-all;
+  max-height: 180px; overflow-y: auto;
+  margin-top: 10px; display: none;
+  line-height: 1.6; position: relative;
+}
+.prompt-box::before {
+  content: '提示词'; position: absolute; top: 8px; right: 12px;
+  font-size: 10px; color: #94a3b8; font-family: inherit;
+  text-transform: uppercase; letter-spacing: 1px;
+}
+.prompt-box.show { display: block; animation: fadeUp .3s ease; }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ====== Help ====== */
+.help-steps { counter-reset: step; list-style: none; }
+.help-steps li {
+  counter-increment: step; padding: 8px 0 8px 36px;
+  position: relative; font-size: 14px; color: var(--text-secondary);
+  border-bottom: 1px solid #f1f5f9;
+}
+.help-steps li:last-child { border-bottom: none; }
+.help-steps li::before {
+  content: counter(step); position: absolute; left: 0; top: 6px;
+  width: 24px; height: 24px; border-radius: 50%;
+  background: #f1f5f9; color: var(--text-secondary);
+  font-size: 12px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+}
+.help-note {
+  font-size: 12px; color: #94a3b8; margin-top: 14px; text-align: center;
+  padding: 10px; background: #f8fafc; border-radius: 8px;
 }
 
+/* ====== Toast ====== */
 .toast {
-  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
-  background: #333; color: #fff; padding: 10px 24px; border-radius: 20px;
-  font-size: 14px; z-index: 100; opacity: 0; transition: opacity 0.3s;
+  position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(20px);
+  background: #1e293b; color: #fff; padding: 12px 28px; border-radius: 24px;
+  font-size: 14px; font-weight: 600; z-index: 100;
+  opacity: 0; transition: all .3s cubic-bezier(.4,0,.2,1);
+  pointer-events: none; box-shadow: 0 8px 24px rgba(0,0,0,.2);
+  white-space: nowrap;
 }
-.toast.show { opacity: 1; }
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-.steps { font-size: 13px; color: #666; margin-top: 16px; }
-.steps ol { padding-left: 20px; }
-.steps li { margin-bottom: 4px; }
-
-footer { text-align: center; padding: 20px; font-size: 12px; color: #999; }
-footer a { color: #1a73e8; text-decoration: none; }
+/* ====== Footer ====== */
+footer {
+  text-align: center; padding: 8px 20px 28px; font-size: 12px; color: #94a3b8;
+}
+footer a { color: var(--primary); text-decoration: none; font-weight: 500; }
 </style>
 </head>
 <body>
 
-<header>
+<div class="app-bar">
+  <span class="logo">&#x1F4DD;</span>
   <h1>上海等级考出题助手</h1>
-  <p>拍照 → 识别 → 一键生成等级考格式 Word</p>
-</header>
+  <p class="tagline">拍照 &#183; 识别 &#183; 一键生成等级考格式 Word</p>
+</div>
+
+<div class="steps-bar" id="stepsBar">
+  <div class="step-dot active" id="dot1">1</div>
+  <div class="step-line" id="line1"></div>
+  <div class="step-dot" id="dot2">2</div>
+  <div class="step-line" id="line2"></div>
+  <div class="step-dot" id="dot3">3</div>
+  <div class="step-line" id="line3"></div>
+  <div class="step-dot" id="dot4">4</div>
+</div>
 
 <main>
-  <!-- 科目选择 -->
+  <!-- Step 1: Subject -->
   <div class="card">
-    <h2>1. 选择科目</h2>
+    <div class="card-head">
+      <div class="num">1</div>
+      <h2>选择科目</h2>
+    </div>
     <div class="subject-row" id="subjectRow">
-      <button class="subject-btn active" data-subject="化学">化学</button>
-      <button class="subject-btn" data-subject="物理">物理</button>
+      <button class="subject-btn chem active" data-subject="化学">
+        <span class="emoji">&#x1F9EA;</span>化学
+      </button>
+      <button class="subject-btn phys" data-subject="物理">
+        <span class="emoji">&#x26A1;</span>物理
+      </button>
     </div>
   </div>
 
-  <!-- 上传题目 -->
+  <!-- Step 2: Upload -->
   <div class="card">
-    <h2>2. 上传题目</h2>
+    <div class="card-head">
+      <div class="num">2</div>
+      <h2>上传题目</h2>
+    </div>
     <div class="upload-area" id="uploadArea">
-      <div class="icon">📷</div>
-      <div class="hint">点击<strong>拍照</strong>或<strong>选择图片</strong></div>
-      <div class="hint" style="font-size:11px;margin-top:4px">支持截图、照片、PDF 截图</div>
+      <span class="upload-icon" id="uploadIcon">&#x1F4F7;</span>
+      <div class="hint" id="uploadHint">
+        点击<b>拍照</b>或<b>选择图片</b>
+        <br><span style="font-size:12px;color:#94a3b8">支持截图、照片、PDF 截图</span>
+      </div>
     </div>
     <input type="file" id="fileInput" accept="image/*" capture="environment" style="display:none">
     <img class="preview-img" id="previewImg" alt="题目预览">
   </div>
 
-  <!-- 题目文字（可编辑） -->
+  <!-- Step 3: Text Edit -->
   <div class="card" id="textCard" style="display:none">
-    <h2>3. 确认题目文字（可编辑修改）</h2>
+    <div class="card-head">
+      <div class="num">3</div>
+      <h2>确认题目文字</h2>
+      <span style="font-size:11px;color:#94a3b8;margin-left:auto">可编辑修改</span>
+    </div>
     <textarea id="questionText" placeholder="题目文字将显示在这里，可以手动编辑修正..."></textarea>
-    <button class="btn btn-primary" id="generateBtn" style="margin-top:12px">
-      生成等级考格式
+    <button class="btn btn-primary" id="generateBtn">
+      &#x2728; 生成等级考格式
     </button>
   </div>
 
-  <!-- 生成结果 -->
+  <!-- Step 4: Result -->
   <div class="card" id="resultCard" style="display:none">
-    <h2>4. 使用 Claude 生成</h2>
-    <p style="font-size:13px;color:#666;margin-bottom:8px">
-      复制以下提示词，在 Claude Code 中直接使用：
+    <div class="card-head">
+      <div class="num">4</div>
+      <h2>使用 Claude 生成</h2>
+    </div>
+    <p style="font-size:13px;color:var(--text-secondary);margin-bottom:10px">
+      复制以下提示词，粘贴到 <b>Claude Code</b> 中使用：
     </p>
     <div class="prompt-box" id="promptBox"></div>
-    <button class="btn btn-secondary" id="copyBtn">复制提示词</button>
-    <button class="btn btn-success" id="newQuestionBtn">处理新题目</button>
+    <button class="btn btn-copy" id="copyBtn">&#x1F4CB; 复制提示词</button>
+    <button class="btn btn-reset" id="newQuestionBtn">处理新题目</button>
   </div>
 
-  <!-- 使用说明 -->
+  <!-- Help -->
   <div class="card" id="helpCard">
-    <h2>使用说明</h2>
-    <div class="steps">
-      <ol>
-        <li>选择科目（物理/化学）</li>
-        <li>拍照或选择外地题目的图片</li>
-        <li>确认/修改识别的题目文字</li>
-        <li>复制自动生成的提示词到 Claude Code</li>
-        <li>Claude 会在桌面端生成规范 .docx 文件</li>
-      </ol>
+    <div class="card-head">
+      <div class="num">?</div>
+      <h2>使用说明</h2>
     </div>
-    <p style="font-size:12px;color:#888;margin-top:12px">
-      提示：手机端用于采集题目，实际生成需在安装此 skill 的 Claude Code 中完成。
-    </p>
+    <ol class="help-steps">
+      <li>选择科目（物理 / 化学）</li>
+      <li>拍照或选择外地题目的图片</li>
+      <li>确认或手动修改题目文字</li>
+      <li>复制生成的提示词到 Claude Code</li>
+      <li>Claude 在桌面端生成规范 .docx 文件</li>
+    </ol>
+    <div class="help-note">
+      &#x1F4A1; 手机端采集题目，实际生成需在安装了此 skill 的 Claude Code 中完成
+    </div>
   </div>
 </main>
 
 <div class="toast" id="toast"></div>
 
 <footer>
-  <p>上海等级考出题助手 · Claude Code Skill</p>
-  <p><a href="https://github.com" target="_blank">GitHub</a></p>
+  上海等级考出题助手 &middot;
+  <a href="https://github.com/fdu280310-hub/shanghai-grade-exam-helper" target="_blank">GitHub</a>
 </footer>
 
 <script src="app.js"></script>
