@@ -586,7 +586,7 @@ def build_document_xml(data):
                         paras.append(para_option(label, text))
 
             elif q_type == "fill":
-                paras.append(para_fill_blank())
+                pass  # 填空题空格已在 stem 中以 __________ 表示，不额外添加
 
             elif q_type in ("calc", "explain"):
                 # 计算题或简答题，留空行
