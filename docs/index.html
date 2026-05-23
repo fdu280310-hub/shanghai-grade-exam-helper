@@ -301,7 +301,7 @@ footer a { color: var(--primary); text-decoration: none; font-weight: 500; }
         <br><span style="font-size:12px;color:#94a3b8">支持截图、照片、PDF 截图</span>
       </div>
     </div>
-    <input type="file" id="fileInput" accept="image/*" capture="environment" style="display:none">
+    <input type="file" id="fileInput" accept="image/*" style="display:none">
     <img class="preview-img" id="previewImg" alt="题目预览">
   </div>
 
@@ -316,6 +316,12 @@ footer a { color: var(--primary); text-decoration: none; font-weight: 500; }
     <button class="btn btn-primary" id="generateBtn">
       &#x2728; 生成等级考格式
     </button>
+    <button class="btn btn-copy" id="downloadDocxBtn" style="margin-top:8px">
+      &#x1F4E5; 直接下载 .docx 文件
+    </button>
+    <p style="font-size:11px;color:#94a3b8;text-align:center;margin-top:8px">
+      无需 Claude Code，浏览器直接生成 Word
+    </p>
   </div>
 
   <!-- Step 4: Result -->
@@ -342,11 +348,11 @@ footer a { color: var(--primary); text-decoration: none; font-weight: 500; }
       <li>选择科目（物理 / 化学）</li>
       <li>拍照或选择外地题目的图片</li>
       <li>确认或手动修改题目文字</li>
-      <li>复制生成的提示词到 Claude Code</li>
-      <li>Claude 在桌面端生成规范 .docx 文件</li>
+      <li>点击「直接下载 .docx」在浏览器生成 Word 文件</li>
+      <li>也可复制提示词到 Claude Code 获得 AI 智能改编</li>
     </ol>
     <div class="help-note">
-      &#x1F4A1; 手机端采集题目，实际生成需在安装了此 skill 的 Claude Code 中完成
+      &#x1F4A1; 浏览器直接生成 .docx 无需安装任何东西；AI 智能改编需要 Claude Code
     </div>
   </div>
 </main>
@@ -358,6 +364,7 @@ footer a { color: var(--primary); text-decoration: none; font-weight: 500; }
   <a href="https://github.com/fdu280310-hub/shanghai-grade-exam-helper" target="_blank">GitHub</a>
 </footer>
 
+<script src="https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.umd.min.js"></script>
 <script src="app.js"></script>
 </body>
 </html>
